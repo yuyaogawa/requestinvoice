@@ -42,12 +42,12 @@ import uuid
 @limiter.limit("20 per minute")
 @app.route('/invoice/<int:amount>/<description>')
 def getinvoice(amount, description):
-    global plugin
-    label = "ln-getinvoice-{}".format(uuid.uuid4())
-    #invoice = plugin.rpc.invoice(int(amount)*1000, label, description)
-    #gRPC
+    # Call LND gRPC
     response = stub.AddInvoice(ln.Invoice(value=amount,memo=description,))
-    invoice = str(response.payment_request)
+    invoice = {
+        "bolt11": response.payment_request,
+        "payment_hash": response.r_hash.hex(),
+        }
     return invoice
 
 
