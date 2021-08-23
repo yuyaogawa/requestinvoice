@@ -14,7 +14,7 @@ pip3 install -r requirements.txt
 
 ### Running
 ```
-$ python requestinvoice.py
+$ python3 requestinvoice.py
 started server successfully on port 8089
 
 $ curl http://localhost:8809/invoice/100000/some-text-here
@@ -26,7 +26,7 @@ The webserver is rate-limited, meaning that only a certain amount of request per
 The json invoice can be used by other services, for example a service for tipping, donations, PoS devices, ...
 
 
-##### Onion routing
+### Onion routing
 Exposing the url using Onion routing is easy. Install tor and 
 add the service to `/etc/tor/torrc`
 ```
@@ -37,11 +37,11 @@ HiddenServicePort 80 127.0.0.1:8809
 and restart tor to create the url
 ```
 $ systemctl stop tor && systemctl start tor
-$ cat /home/bitcoin/tor/request-invoice-service_v2/hostname
-fkfuvjrbj6cfqppq6xcgfwmp4p23wq2unzlnqmdi6ibqtg2aq7thp2qd.onion
+$ cat /var/lib/tor/request-invoice-service_v2/hostname
+2hlqgasrad74nx6eadtgtf7wsvqwoqizvejva4qdik7gihquxexndtyd.onion
 ```
 
 Use tor browser to visit the url and create a invoice (and make a donation?).
-http://fkfuvjrbj6cfqppq6xcgfwmp4p23wq2unzlnqmdi6ibqtg2aq7thp2qd.onion/invoice/1000/donation
+http://2hlqgasrad74nx6eadtgtf7wsvqwoqizvejva4qdik7gihquxexndtyd.onion/invoice/1000/donation
 
 
