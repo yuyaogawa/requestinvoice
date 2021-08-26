@@ -9,15 +9,17 @@ os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 def metadata_callback(context, callback):
     callback([('macaroon', macaroon)], None)
 
-cert = open(os.path.expanduser('~/.lnd/tls.cert'), 'rb').read()
-with open(os.path.expanduser('~/.lnd/data/chain/bitcoin/testnet/admin.macaroon'), 'rb') as f:
+endpoint = os.getenv("LND_GRPC_ENDPOINT")
+port = int(os.getenv("LND_GRPC_PORT"))
+cert = open(os.getenv("LND_GRPC_CERT"), 'rb').read()
+with open(os.getenv("LND_GRPC_MACAROON"), 'rb') as f:
     macaroon_bytes = f.read()
     macaroon = codecs.encode(macaroon_bytes, 'hex')
 
 cert_creds = grpc.ssl_channel_credentials(cert)
 auth_creds = grpc.metadata_call_credentials(metadata_callback)
 combined_creds = grpc.composite_channel_credentials(cert_creds, auth_creds)
-channel = grpc.secure_channel('localhost:10009', combined_creds)
+channel = grpc.secure_channel(f"{endpoint}:{port}", combined_creds)
 stub = lnrpc.LightningStub(channel)
 
 
