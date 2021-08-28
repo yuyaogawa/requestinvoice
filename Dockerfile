@@ -9,6 +9,8 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+USER 1000:1000
+
 EXPOSE 8809
 
 CMD [ "python3", "requestinvoice.py"]

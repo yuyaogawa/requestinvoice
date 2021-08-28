@@ -23,22 +23,17 @@ channel = grpc.secure_channel(f"{endpoint}:{port}", combined_creds)
 stub = lnrpc.LightningStub(channel)
 
 
-from flask import Flask
+import flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from pathlib import Path
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-from tornado.wsgi import WSGIContainer
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 limiter = Limiter(
     app,
     key_func=get_remote_address,
     default_limits=["2000 per day", "20 per minute"]
 )
 
-import asyncio
 import uuid
 
 @limiter.limit("20 per minute")
@@ -52,18 +47,58 @@ def getinvoice(amount, description):
         }
     return invoice
 
+def event_stream():
+    # TODO: handle client disconnection.
+    print('event_stream...')
+    for invoice in stub.SubscribeInvoices(ln.InvoiceSubscription()):
+        if(invoice.state == 1):
+            print(invoice.r_hash.hex())
+            yield 'data:"Invoice paid"\n\n'
+
+@app.route('/stream')
+def stream():
+    print('streaming...')
+    return flask.Response(event_stream(),
+                          mimetype="text/event-stream")
+
+@app.route('/')
+def home():
+    return """
+        <!doctype html>
+        <title>chat</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <style>body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }</style>
+        <p><b>hi, bitcoiner</b></p>
+        <p>Message: <input id="in" /></p>
+        <pre id="out"></pre>
+        <script>
+            function sse() {
+                var source = new EventSource('/stream');
+                var out = document.getElementById('out');
+                source.onmessage = function(e) {
+                    // XSS in chat is fun (let's prevent that)
+                    out.textContent =  e.data + '\\n' + out.textContent;
+                };
+            }
+            $('#in').keyup(function(e){
+                if (e.keyCode == 13) {
+                    $.get('/invoice/100/' + $(this).val())
+                    .done(function( data ) {
+                        out.textContent = data.bolt11;
+                    });
+                    $(this).val('');
+                }
+            });
+            sse();
+        </script>
+    """
 
 if __name__ == '__main__':
-    port = os.getenv("REQUEST_INVOICE_PORT", default = 8809)
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
     print('Starting server on port {port}'.format(
         port=port
     ))
     app.config['SECRET_KEY'] = os.getenv(
         "REQUEST_INVOICE_SECRET",
         default=uuid.uuid4())
-
-    http_server = HTTPServer(WSGIContainer(app))
-    http_server.listen(port)
-    IOLoop.instance().start()
+    app.debug = True
+    app.run(host='0.0.0.0', port=8809)
