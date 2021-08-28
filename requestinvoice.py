@@ -26,6 +26,7 @@ stub = lnrpc.LightningStub(channel)
 import flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import uuid
 
 app = flask.Flask(__name__)
 limiter = Limiter(
@@ -34,7 +35,6 @@ limiter = Limiter(
     default_limits=["2000 per day", "20 per minute"]
 )
 
-import uuid
 
 @limiter.limit("20 per minute")
 @app.route('/invoice/<int:amount>/<description>')
@@ -65,12 +65,17 @@ def stream():
 def home():
     return """
         <!doctype html>
-        <title>chat</title>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>hi, bitcoiner</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	    <script src="https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js"></script> 
         <style>body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }</style>
+        </head>
         <p><b>hi, bitcoiner</b></p>
         <p>Message: <input id="in" /></p>
         <pre id="out"></pre>
+        <div id="invoice"></div>
         <script>
             function sse() {
                 var source = new EventSource('/stream');
@@ -85,6 +90,8 @@ def home():
                     $.get('/invoice/100/' + $(this).val())
                     .done(function( data ) {
                         out.textContent = data.bolt11;
+                        $('#invoice').empty();
+                        $('#invoice').append(kjua({text: data.bolt11}));
                     });
                     $(this).val('');
                 }
