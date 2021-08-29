@@ -66,16 +66,16 @@ def home():
     return """
         <!doctype html>
         <head>
-        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name='viewport' content='width=device-width,initial-scale=1'>
         <title>hi, bitcoiner</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	    <script src="https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js"></script> 
+        <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+	    <script src='https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js'></script> 
         <style>body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }</style>
         </head>
         <p><b>hi, bitcoiner</b></p>
-        <p>Message: <input id="in" /></p>
-        <pre id="out"></pre>
-        <div id="invoice"></div>
+        <p>Amount: <input type='number' id='in' /> sats</p>
+        <pre id='out'></pre>
+        <a id='link-invoice' href=''><div id='invoice'></div></a>
         <script>
             function sse() {
                 var source = new EventSource('/stream');
@@ -87,11 +87,12 @@ def home():
             }
             $('#in').keyup(function(e){
                 if (e.keyCode == 13) {
-                    $.get('/invoice/100/' + $(this).val())
+                    $.get('/invoice/' + $(this).val() + '/request')
                     .done(function( data ) {
                         out.textContent = data.bolt11;
                         $('#invoice').empty();
                         $('#invoice').append(kjua({text: data.bolt11}));
+                        $('#link-invoice').attr('href', 'lightning:' + data.bolt11)
                     });
                     $(this).val('');
                 }
