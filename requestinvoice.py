@@ -70,7 +70,10 @@ def home():
         <title>hi, bitcoiner</title>
         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
 	    <script src='https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js'></script> 
-        <style>body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }</style>
+        <style>
+        body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+        </style>
         </head>
         <p><b>hi, bitcoiner</b></p>
         <p>Amount: <input type='number' id='in' /> sats</p>
