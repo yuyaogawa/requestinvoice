@@ -45,3 +45,13 @@ Use tor browser to visit the url and create a invoice (and make a donation?).
 http://2hlqgasrad74nx6eadtgtf7wsvqwoqizvejva4qdik7gihquxexndtyd.onion/invoice/1000/donation
 
 
+### Docker
+
+```
+docker run -v $HOME:/root -p 8809:8809 --network=host -t yuya207503/requestinvoice
+```
+
+### Python gRPC
+This tool uses a Python gRPC to communicate with lnd. Follow the instruction below.
+
+https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/python.md

@@ -3,6 +3,14 @@ from lnd_grpc import lightning_pb2_grpc as lnrpc
 import grpc
 import os
 import codecs
+from os.path import join, dirname
+from dotenv import load_dotenv
+from google.protobuf.json_format import MessageToDict
+
+load_dotenv(verbose=True)
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
@@ -47,6 +55,13 @@ def getinvoice(amount, description):
         }
     return invoice
 
+@app.route('/listchannels')
+def listchannels():
+    # Call LND gRPC
+    response = stub.ListChannels(ln.ListChannelsRequest())
+    channels = MessageToDict(response)
+    return channels
+
 def event_stream():
     # TODO: handle client disconnection.
     print('event_stream...')
@@ -69,9 +84,9 @@ def home():
         <meta name='viewport' content='width=device-width,initial-scale=1'>
         <title>hi, bitcoiner</title>
         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
-	    <script src='https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js'></script> 
+	    <script src='https://cdn.jsdelivr.net/npm/kjua@0.6.0/dist/kjua.min.js'></script>
         <style>
-        body { max-width: 500px; margin: auto; padding: 1em; background: gray; color: #fff; font: 16px/1.6 menlo, monospace; }
+        body { max-width: 500px; margin: auto; padding: 1em; background: #777799; color: #fff; font: 16px/1.6 menlo, monospace; }
         pre { white-space: pre-wrap; word-wrap: break-word; }
         </style>
         </head>
