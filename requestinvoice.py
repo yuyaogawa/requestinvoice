@@ -76,6 +76,15 @@ def stream():
     return flask.Response(event_stream(),
                           mimetype="text/event-stream")
 
+@app.route('/nodeinfo')
+def getnodeinfo():
+    # Call LND gRPC
+    response = stub.GetInfo(ln.GetInfoRequest())
+    node_info = {
+        "node_id": response.identity_pubkey,
+        }
+    return node_info
+
 @app.route('/')
 def home():
     return """
